@@ -10,7 +10,7 @@ image:
   - Visual Studio 2017
   - Visual Studio 2015
 install:
-  - ps: Install-Module -Name InvokeBuild -Confirm:$false -ErrorAction Stop
+  - ps: Install-Module -Name InvokeBuild -Confirm:$false -ErrorAction Stop -force
 
 # Skip on updates to the readme.
 # We can force this by adding [skip ci] or [ci skip] anywhere in commit message

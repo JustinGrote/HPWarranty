@@ -40,16 +40,23 @@ Enter-Build {
             } else {
                 $installModuleParams = @{
                     Scope = "CurrentUser"
-                    Name = $BuildHelperItem
+                    Name = $BuildHelperModuleItem
                     ErrorAction = "Stop"
                 }
                 if ($SCRIPT:CI) {
                     $installModuleParams.Force = $true
                 }
-                install-module -Name $BuildHelperModuleItem @installModuleParams
+                write-build Yellow $installModuleParams
+                install-module @installModuleParams
             }
         }
     }
+
+    #Initialize helpful build environment variables
+    $Timestamp = Get-date -uformat "%Y%m%d-%H%M%S"
+    $PSVersion = $PSVersionTable.PSVersion.Major
+    Set-BuildEnvironment -force
+    write-build Green "Current Branch Name: $BranchName"
 
     $PassThruParams = @{}
     if ( ($VerbosePreference -ne 'SilentlyContinue') -or ($CI -and ($BranchName -ne 'master')) ) {
@@ -57,13 +64,6 @@ Enter-Build {
         $SCRIPT:VerbosePreference = "Continue"
         $PassThruParams.Verbose = $true
     }
-
-    #Initialize helpful build environment variables
-    $Timestamp = Get-date -uformat "%Y%m%d-%H%M%S"
-    $PSVersion = $PSVersionTable.PSVersion.Major
-    Set-BuildEnvironment -force
-
-
 
     #If the branch name is master-test, run the build like we are in "master"
     if ($env:BHBranchName -eq 'master-test') {
@@ -222,7 +222,6 @@ task UpdateMetadata CopyFilesToBuildDir,Version,{
     Update-Metadata -Path $ProjectBuildManifest -PropertyName ModuleVersion -Value $ProjectBuildVersion
 
     # Are we in the master or develop/development branch? Bump the version based on the powershell gallery if so, otherwise add a build tag
-    write-build Yellow "BranchName: $BranchName"
     if ($BranchName -match '^(master|dev(elop)?(ment)?)$') {
         write-build Green "In Master/Develop branch, adding Tag Version $ProjectBuildVersion to this build"
         $Script:ProjectVersion = $ProjectBuildVersion
