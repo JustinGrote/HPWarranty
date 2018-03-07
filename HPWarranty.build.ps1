@@ -302,7 +302,7 @@ task Pester {
     If ($ENV:APPVEYOR) {
         $UploadURL = "https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)"
         write-verbose "Detected we are running in AppVeyor"
-        write-verbose "Uploading Pester Results to $UploadURL"
+        write-verbose "Uploading Pester Results to Appveyor: $UploadURL"
         (New-Object 'System.Net.WebClient').UploadFile(
             "https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)",
             $PesterResultFile )
@@ -317,10 +317,16 @@ task Pester {
 }
 
 task Package Version,{
-    $SCRIPT:ZipArchivePath = (join-path $env:BHBuildOutput "$env:BHProjectName-$ProjectVersion.zip")
+    $ZipArchivePath = (join-path $env:BHBuildOutput "$env:BHProjectName-$ProjectVersion.zip")
     write-build green "Writing Finished Module to $ZipArchivePath"
     #Package the Powershell Module
     Compress-Archive -Path $ProjectBuildPath -DestinationPath $ZipArchivePath -Force @PassThruParams
+
+    #If we are in Appveyor, push completed zip to Appveyor Artifact
+    if ($env:APPVEYOR) {
+        write-host -ForegroundColor Green "Detected Appveyor, pushing Powershell Module archive to Artifacts"
+        Push-AppveyorArtifact $ZipArchivePath
+    }
 }
 
 #Deploy Supertask
