@@ -95,6 +95,13 @@ Enter-Build {
         Get-PackageProvider Nuget @PassThruParams | format-list | out-string | write-verbose
     }
 
+    #Fix a bug with the Appveyor 2017 image having a broken nuget (points to v3 URL but installed packagemanagement doesn't query v3 correctly)
+    #Next command will add this back
+    if ($ENV:APPVEYOR -and ($ENV:APPVEYOR_BUILD_WORKER_IMAGE -eq 'Visual Studio 2017')) {
+        write-verbose "Detected Appveyor VS2017 Image, using v2 Nuget API"
+        UnRegister-PackageSource -Name nuget.org
+    }
+
     #Add the nuget repository so we can download things like GitVersion
     if (!(Get-PackageSource "nuget.org" -erroraction silentlycontinue)) {
         write-verbose "Registering nuget.org as package source"
@@ -140,11 +147,6 @@ task Version {
         Get-PackageSource | Format-Table | out-string | write-verbose
 
         #Fetch GitVersion
-        #Fix a bug with the Appveyor 2017 image having a broken nuget (points to v3 URL but installed packagemanagement doesn't query v3 correctly)
-        if ($ENV:APPVEYOR -and ($ENV:APPVEYOR_BUILD_WORKER_IMAGE -eq 'Visual Studio 2017')) {
-            Write-Build Green "Detected Appveyor VS2017 Image, using v2 Nuget API"
-            $PSDefaultParameterValues.add("*-Package:Source",'http://www.nuget.org/api/v2')
-        }
         Install-Package $GitVersionCMDPackageName -scope currentuser -source 'nuget.org' -force @PassThruParams | Out-Null
     }
     $GitVersionEXE = ((get-package $GitVersionCMDPackageName).source | split-path -Parent) + "\tools\GitVersion.exe"

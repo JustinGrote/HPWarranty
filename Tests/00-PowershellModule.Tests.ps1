@@ -62,7 +62,7 @@ Describe 'Powershell Module' {
 }
 
 Describe 'PSScriptAnalyzer' {
-    $results = Invoke-ScriptAnalyzer -Path $BuildOutputProject -Recurse -ExcludeRule "PSAvoidUsingCmdletAliases"
+    $results = Invoke-ScriptAnalyzer -Path $BuildOutputProject -Recurse -ExcludeRule "PSAvoidUsingCmdletAliases" -Verbose:$false
     It 'PSScriptAnalyzer returns zero errors for all files in the repository' {
         $results.Count | Should Be 0
     }
