@@ -8,7 +8,7 @@ Describe 'Powershell Module' {
     Context "$env:BHProjectName" {
         $ModuleName = $env:BHProjectName
         It 'Has a valid Module Manifest' {
-            if ($isCoreCLR) {
+            if ($isCoreCLR -or $PSVersionTable.PSVersion -ge [Version]"5.1") {
                 $Script:Manifest = Test-ModuleManifest $ModuleManifestPath
             } else {
                 #Copy the Module Manifest to a temp file in order to test to fix a bug where
@@ -50,11 +50,14 @@ Describe 'Powershell Module' {
             $Script:Manifest.exportedcommands.count | Should BeGreaterThan 0
         }
         It 'Can be imported as a module successfully' {
+            Remove-Module $ModuleName -ErrorAction SilentlyContinue
             Import-Module $BuildOutputProject -PassThru -OutVariable BuildOutputModule | Should BeOfType System.Management.Automation.PSModuleInfo
             $BuildOutputModule.Name | Should Be $ModuleName
         }
         It 'Is visible in Get-Module' {
-            (Get-Module $ModuleName).Name | Should Be $ModuleName
+            $module = Get-Module $ModuleName
+            $Module | Should BeOfType System.Management.Automation.PSModuleInfo
+            $Module.Name | Should Be $ModuleName
         }
     }
 }
