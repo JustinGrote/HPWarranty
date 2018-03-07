@@ -28,5 +28,6 @@ test_script:
 deploy: false
 
 on_finish:
+  - ps: Invoke-Build Package;Push-AppveyorArtifact $ZipArchivePath
 #If "AppveyorRDPDebug" is in the commit message, open an RDP session to investigate after build.
   - ps: if ($env:APPVEYOR_REPO_COMMIT_MESSAGE -match 'AppveyorRDPDebug') {$blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))}
