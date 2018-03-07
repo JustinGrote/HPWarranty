@@ -8,8 +8,6 @@
 #It is recommended to only bootstrap BuildHelpers and PSDepend, and use PSDepend for remaining prereqs
 $BuildHelperModules = "BuildHelpers", "PSDepend", "Pester", "powershell-yaml", "Microsoft.Powershell.Archive"
 
-
-
 #Initialize Build Environment
 Enter-Build {
     $lines = '----------------------------------------------------------------'
@@ -31,6 +29,9 @@ Enter-Build {
     #Fetch Build Helper Modules using Install-ModuleBootstrap script (works in PSv3/4)
     #The comma in ArgumentList a weird idiosyncracy to make sure a nested array is created to ensure Argumentlist
     #doesn't unwrap the buildhelpermodules as individual arguments
+
+
+
     foreach ($BuildHelperModuleItem in $BuildHelperModules) {
         if (-not (Get-module $BuildHelperModuleItem -listavailable)) {
             write-verbose "Installing $BuildHelperModuleItem from Powershell Gallery to your currentuser module directory"
@@ -38,6 +39,13 @@ Enter-Build {
                 write-verboseheader "Bootstrapping Powershell Module: $BuildHelperModuleItem"
                 Invoke-Command -ArgumentList @(, $BuildHelperModules) -ScriptBlock ([scriptblock]::Create((new-object net.webclient).DownloadString('https://git.io/PSModBootstrap')))
             } else {
+                $installModuleParams = @{
+                    Scope = "CurrentUser"
+                    Name = $BuildHelperItem
+                }
+                if ($SCRIPT:CI) {
+                    $installModuleParams
+                }
                 install-module -scope currentuser -Name $BuildHelperModuleItem -ErrorAction stop
             }
         }
@@ -98,7 +106,6 @@ Enter-Build {
             write-verboseheader "Nuget.Org Package Source Info "
             $nugetOrgPackageSource | format-table | out-string | write-verbose
         }
-
     }
 
     #Move to the Project Directory if we aren't there already
@@ -116,8 +123,6 @@ task Clean {
         remove-item $env:BHBuildOutput -Recurse -Force @PassThruParams
     }
     New-Item -ItemType Directory $ProjectBuildPath -force | % FullName | out-string | write-verbose
-
-
     #Unmount any modules named the same as our module
 
 }
