@@ -141,7 +141,7 @@ task Version {
 
         #Fetch GitVersion
         #Fix a bug with the Appveyor 2017 image having a broken nuget (points to v3 URL but installed packagemanagement doesn't query v3 correctly)
-        if ($ENV:APPVEYOR -and $ENV:APPVEYOR_BUILD_WORKER_IMAGE -eq 'Visual Studio 2017') {
+        if ($ENV:APPVEYOR -and ($ENV:APPVEYOR_BUILD_WORKER_IMAGE -eq 'Visual Studio 2017')) {
             Write-Build Green "Detected Appveyor VS2017 Image, using v2 Nuget API"
             $PSDefaultParameterValues.add("*-Package:Source",'http://www.nuget.org/api/v2')
         }
