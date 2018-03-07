@@ -105,7 +105,7 @@ Enter-Build {
     #Add the nuget repository so we can download things like GitVersion
     if (!(Get-PackageSource "nuget.org" -erroraction silentlycontinue)) {
         write-verbose "Registering nuget.org as package source"
-        Register-PackageSource -provider NuGet -name nuget.org -location http://www.nuget.org/api/v2 -Trusted @PassThruParams  | out-string | out-verbose
+        Register-PackageSource -provider NuGet -name nuget.org -location http://www.nuget.org/api/v2 -Trusted @PassThruParams  | out-string | write-verbose
     }
     else {
         $nugetOrgPackageSource = Set-PackageSource -name 'nuget.org' -Trusted @PassThruParams
