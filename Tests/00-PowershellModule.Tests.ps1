@@ -4,7 +4,6 @@ $BuildOutputProject = Join-Path $env:BHBuildOutput $env:BHProjectName
 
 Describe 'Powershell Module' {
     $ModuleManifestPath = Join-Path $BuildOutputProject '\*.psd1'
-
     Context "$env:BHProjectName" {
         $ModuleName = $env:BHProjectName
         It 'Has a valid Module Manifest' {
