@@ -112,7 +112,7 @@ Enter-Build {
 task Clean {
     #Reset the BuildOutput Directory
     if (test-path $env:BHBuildOutput) {
-        write-verbose "Removing and resetting $($ENV:BHBuildOutput)"
+        Write-Verbose "Removing and resetting Build Output Path: $($ENV:BHBuildOutput)"
         remove-item $env:BHBuildOutput -Recurse -Force @PassThruParams
     }
     New-Item -ItemType Directory $ProjectBuildPath -force | % FullName | out-string | write-verbose
