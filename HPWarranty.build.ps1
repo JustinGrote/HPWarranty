@@ -46,7 +46,6 @@ Enter-Build {
                 if ($SCRIPT:CI) {
                     $installModuleParams.Force = $true
                 }
-                write-build Yellow $installModuleParams
                 install-module @installModuleParams
             }
         }
