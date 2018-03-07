@@ -2,12 +2,12 @@
 $PSVersion = $PSVersionTable.PSVersion.Major
 $BuildOutputProject = Join-Path $env:BHBuildOutput $env:BHProjectName
 
-Describe "Module Build" {
-    $ModuleManifestPath = Join-Path $BuildOutputProject "\*.psd1"
+Describe 'Powershell Module' {
+    $ModuleManifestPath = Join-Path $BuildOutputProject '\*.psd1'
 
     Context "$env:BHProjectName" {
         $ModuleName = $env:BHProjectName
-        It "Has a valid Module Manifest" {
+        It 'Has a valid Module Manifest' {
             if ($isCoreCLR) {
                 $Script:Manifest = Test-ModuleManifest $ModuleManifestPath
             } else {
@@ -20,19 +20,19 @@ Describe "Module Build" {
             }
         }
 
-        It "Has a valid root module" {
+        It 'Has a valid root module' {
             $Manifest.RootModule | Should Be "$ModuleName.psm1"
         }
 
-        It "Has a valid Description" {
+        It 'Has a valid Description' {
             $Manifest.Description | Should Not BeNullOrEmpty
         }
 
-        It "Has a valid GUID" {
+        It 'Has a valid GUID' {
             [Guid]$Manifest.Guid | Should BeOfType 'System.GUID'
         }
 
-        It "Has a valid Copyright" {
+        It 'Has a valid Copyright' {
             $Manifest.Copyright | Should Not BeNullOrEmpty
         }
 
@@ -46,20 +46,20 @@ Describe "Module Build" {
             }
         }
 
-        It "Has at least 1 exported command" {
+        It 'Has at least 1 exported command' {
             $Script:Manifest.exportedcommands.count | Should BeGreaterThan 0
         }
-        It "Can be imported as a module successfully" {
+        It 'Can be imported as a module successfully' {
             Import-Module $BuildOutputProject -PassThru -OutVariable BuildOutputModule | Should BeOfType System.Management.Automation.PSModuleInfo
             $BuildOutputModule.Name | Should Be $ModuleName
         }
-        It "Is visible in Get-Module" {
+        It 'Is visible in Get-Module' {
             (Get-Module $ModuleName).Name | Should Be $ModuleName
         }
     }
 }
 
-Describe "PSScriptAnalyzer" {
+Describe 'PSScriptAnalyzer' {
     $results = Invoke-ScriptAnalyzer -Path $BuildOutputProject -Recurse -ExcludeRule "PSAvoidUsingCmdletAliases"
     It 'PSScriptAnalyzer returns zero errors for all files in the repository' {
         $results.Count | Should Be 0
