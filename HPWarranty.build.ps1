@@ -6,7 +6,7 @@
 
 #This variable specifies what modules to bootstrap for the build
 #It is recommended to only bootstrap BuildHelpers and PSDepend, and use PSDepend for remaining prereqs
-$BuildHelperModules = "BuildHelpers", "PSDepend", "Pester", "powershell-yaml", "Microsoft.Powershell.Archive"
+$BuildHelperModules = "BuildHelpers", "PSDepend", "Pester", "powershell-yaml", "Microsoft.Powershell.Archive", "PSScriptAnalyzer"
 
 #Initialize Build Environment
 Enter-Build {
@@ -20,7 +20,7 @@ Enter-Build {
     }
 
     #Detect if we are in a continuous integration environment (Appveyor, etc.) or otherwise running noninteractively
-    if ($ENV:CI -or ([Environment]::GetCommandLineArgs() -like '^-noni*')) {
+    if ($ENV:CI -or ([Environment]::GetCommandLineArgs() -like '-noni*')) {
         write-build Green 'Detected a Noninteractive or CI environment, disabling prompt confirmations'
         $SCRIPT:CI = $true
         $ConfirmPreference = 'None'
@@ -29,8 +29,7 @@ Enter-Build {
     #Fetch Build Helper Modules using Install-ModuleBootstrap script (works in PSv3/4)
     #The comma in ArgumentList a weird idiosyncracy to make sure a nested array is created to ensure Argumentlist
     #doesn't unwrap the buildhelpermodules as individual arguments
-
-
+    #We suppress verbose output for master builds (because they should have already been built once cleanly)
 
     foreach ($BuildHelperModuleItem in $BuildHelperModules) {
         if (-not (Get-module $BuildHelperModuleItem -listavailable)) {
@@ -42,13 +41,21 @@ Enter-Build {
                 $installModuleParams = @{
                     Scope = "CurrentUser"
                     Name = $BuildHelperItem
+                    ErrorAction = Stop
                 }
                 if ($SCRIPT:CI) {
-                    $installModuleParams
+                    $installModuleParams.Force = $true
                 }
-                install-module -scope currentuser -Name $BuildHelperModuleItem -ErrorAction stop
+                install-module @installModuleParams
             }
         }
+    }
+
+    $PassThruParams = @{}
+    if ( ($VerbosePreference -ne 'SilentlyContinue') -or ($CI -and ($BranchName -ne 'master')) ) {
+        write-build Green "Verbose Build Logging Enabled"
+        $SCRIPT:VerbosePreference = "Continue"
+        $PassThruParams.Verbose = $true
     }
 
     #Initialize helpful build environment variables
@@ -56,7 +63,7 @@ Enter-Build {
     $PSVersion = $PSVersionTable.PSVersion.Major
     Set-BuildEnvironment -force
 
-    $PassThruParams = @{}
+
 
     #If the branch name is master-test, run the build like we are in "master"
     if ($env:BHBranchName -eq 'master-test') {
@@ -64,13 +71,6 @@ Enter-Build {
         $SCRIPT:BranchName = "master"
     } else {
         $SCRIPT:BranchName = $env:BHBranchName
-    }
-
-    #We suppress verbose output for master builds (because they should have already been built once cleanly)
-    if ( ($VerbosePreference -ne 'SilentlyContinue') -or ($CI -and ($BranchName -ne 'master')) ) {
-        write-build Green "Verbose Build Logging Enabled"
-        $SCRIPT:VerbosePreference = "Continue"
-        $PassThruParams.Verbose = $true
     }
 
     write-verboseheader "Build Environment Prepared! Environment Information:"
@@ -122,7 +122,7 @@ task Clean {
         Write-Verbose "Removing and resetting Build Output Path: $($ENV:BHBuildOutput)"
         remove-item $env:BHBuildOutput -Recurse -Force @PassThruParams
     }
-    New-Item -ItemType Directory $ProjectBuildPath -force | % FullName | out-string | write-verbose
+    New-Item -ItemType Directory $ProjectBuildPath -force | ForEach-Object FullName | out-string | write-verbose
     #Unmount any modules named the same as our module
 
 }
@@ -137,10 +137,10 @@ task Version {
     if (!(Get-Package $GitVersionCMDPackageName -erroraction SilentlyContinue)) {
         write-verbose "Package $GitVersionCMDPackageName Not Found Locally, Installing..."
         write-verboseheader "Nuget.Org Package Source Info for fetching Gitversion"
-        Get-PackageSource | ft | out-string | write-verbose
+        Get-PackageSource | Format-Table | out-string | write-verbose
 
         #Fetch GitVersion
-        $GitVersionPackage = Install-Package $GitVersionCMDPackageName -scope currentuser -source 'nuget.org' -force @PassThruParams
+        Install-Package $GitVersionCMDPackageName -scope currentuser -source 'nuget.org' -force @PassThruParams | Out-Null
     }
     $GitVersionEXE = ((get-package $GitVersionCMDPackageName).source | split-path -Parent) + "\tools\GitVersion.exe"
 
@@ -290,7 +290,7 @@ task Pester {
         $PesterParams.PesterOption = (new-pesteroption -IncludeVSCodeMarker)
     }
 
-    $PesterResult = Invoke-Pester @PesterParams
+    Invoke-Pester @PesterParams | Out-Null
 
     # In Appveyor?  Upload our test results!
     If ($ENV:APPVEYOR) {

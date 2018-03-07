@@ -10,7 +10,7 @@ image:
 - Visual Studio 2015
 - Visual Studio 2017
 install:
-  - ps: Install-Module -Name Pester,PSScriptAnalyzer,BuildHelpers,InvokeBuild -Confirm:$false -Force -ErrorAction Stop -SkipPublisherCheck
+  - ps: Install-Module -Name InvokeBuild -Confirm:$false -ErrorAction Stop
 
 # Skip on updates to the readme.
 # We can force this by adding [skip ci] or [ci skip] anywhere in commit message
