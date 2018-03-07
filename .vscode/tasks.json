@@ -13,59 +13,64 @@
 
     // Start PowerShell
     "windows": {
-        "command": "${env:windir}/System32/WindowsPowerShell/v1.0/powershell.exe",
-        //"command": "${env:ProgramFiles}/PowerShell/6.0.0/powershell.exe",
+        "command": "powershell.exe",
         "args": [
             "-NoProfile",
             "-NonInteractive",
-            "-ExecutionPolicy", "Bypass", 
-            "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+            "-ExecutionPolicy", "Bypass"
         ],
     },
     "linux": {
-        "command": "/usr/bin/pwsh",
+        "command": "pwsh",
         "args": [
             "-NoProfile",
             "-NonInteractive",
-            "-ExecutionPolicy", "Bypass", 
-            "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+            "-ExecutionPolicy", "Bypass"
         ],
     },
     "osx": {
-        "command": "/usr/local/bin/pwsh",
+        "command": "pwsh",
         "args": [
             "-NoProfile",
             "-NonInteractive",
-            "-ExecutionPolicy", "Bypass", 
-            "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+            "-ExecutionPolicy", "Bypass"
         ],
     },
 
     // Associate with test task runner
     "tasks": [
         {
-            "command": "powershell.exe",
             "label": "Test",
             "group": "test",
+
+            "windows": {
+                "command": "powershell.exe",
+            },
+            "osx": {
+                "command": "pwsh",
+            },
+            "linux": {
+                "command": "pwsh",
+            },
             "args": [
                 "-NoProfile",
                 "-NonInteractive",
-                "-ExecutionPolicy", "Bypass", 
-                "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+                "-ExecutionPolicy", "Bypass",
+                "-Command", "Invoke-Build -Verbose Test"
             ],
             "problemMatcher": "$pester"
         },
         {
             "label": "Test-PSCore",
             "group": "test",
-            "command": "${env:ProgramFiles}/PowerShell/6.0.1/pwsh.exe",
+            "command": "pwsh",
             "args": [
                 "-NoProfile",
                 "-NonInteractive",
                 "-ExecutionPolicy", "Bypass",
-                "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+                "-Command", "Invoke-Build -Verbose Test"
             ],
-            //"problemMatcher": "$pester"
-        },
-	]
+            "problemMatcher": "$pester"
+        }
+    ]
 }

@@ -1,19 +1,29 @@
-# http://www.appveyor.com/docs/appveyor-yml
+# See http://www.appveyor.com/docs/appveyor-yml for many more options
+version: '{build}-{branch}'
+
+#Publish to PowerShell Gallery with this key
+environment:
+  NuGetApiKey:
+    secure: HncD30pn+cWRepdP28pyB1l4BNg3x3MdvcNV8EysOhQ5kBFMHVyXiQM0whuUW78P
 
 image: Visual Studio 2015
-skip_commits:
-  message: /updated readme.*/
 install:
-#  - ps: Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Confirm:$false -Force -ErrorAction Stop | Out-Null
-  - ps: Install-Module -Name Pester,PSScriptAnalyzer -Confirm:$false -Force -ErrorAction Stop -SkipPublisherCheck
-build: off
+  - ps: Install-Module -Name Pester,PSScriptAnalyzer,BuildHelpers,InvokeBuild -Confirm:$false -Force -ErrorAction Stop -SkipPublisherCheck
+
+# Skip on updates to the readme.
+# We can force this by adding [skip ci] or [ci skip] anywhere in commit message
+skip_commits:
+  message: /updated README.*|Update README.*s/
+
+#Kick off the CI/CD pipeline. We do test and build in the same script
+#To be portable to non-Appveyor builds
+#We run it at the test step so that we can upload test results back to the system.
+build: false
 test_script:
-  - ps: . .\Invoke-AppveyorBuild.ps1
-environment:
-  powershell_gallery_api_token:
-    secure: feZG1n6/I0hDzxw9VWtlUph94caZUYw3denU0TLudvgWX9cG/jkjDLOT8ixd02P4
-notifications:
-  - provider: Slack
-    incoming_webhook:
-      secure: AbntoBWt4UaZffU0mBhQjuXCQAIegqF1NtTVdnFyinHHS23C+b/r4/lWGDzneboipU5R9/6ti/x1p1ceodafH5iv+il9EyS87/M8TaE3hf8=
-  
+  - ps: Invoke-Build
+
+deploy: false
+
+on_finish:
+#If "AppveyorRDPDebug" is in the commit message, open an RDP session to investigate after build.
+  - ps: if ($env:APPVEYOR_REPO_COMMIT_MESSAGE -match 'AppveyorRDPDebug') {$blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))}

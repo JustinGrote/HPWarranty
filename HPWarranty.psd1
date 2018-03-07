@@ -60,13 +60,13 @@ ProcessorArchitecture = 'None'
 # TypesToProcess = @()
 
 # Format files (.ps1xml) to be loaded when importing this module
-FormatsToProcess = @('Types\*.ps1xml')
+FormatsToProcess = @('.\Types\*.ps1xml')
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
 NestedModules = @('.\SubModules\PowerHTML\PowerHtml.psd1')
 
 # Functions to export from this module
-# FunctionsToExport = @('*')
+FunctionsToExport = @('*')
 
 # Cmdlets to export from this module
 #CmdletsToExport = @()
@@ -84,7 +84,7 @@ NestedModules = @('.\SubModules\PowerHTML\PowerHtml.psd1')
 # ModuleList = @()
 
 # List of all files packaged with this module
-# FileList = 
+# FileList =
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
@@ -110,7 +110,7 @@ PrivateData = @{
         # ExternalModuleDependencies = ''
 
     } # End of PSData hashtable
-    
+
  } # End of PrivateData hashtable
 
 # HelpInfo URI of this module
