@@ -102,7 +102,7 @@ Enter-Build {
     }
 
     #Move to the Project Directory if we aren't there already
-    Set-Location $ENV:BHProjectPath
+    Set-Location $buildRoot
 
     #Define the Project Build Path
     $SCRIPT:ProjectBuildPath = $ENV:BHBuildOutput + "\" + $ENV:BHProjectName
@@ -124,7 +124,7 @@ task Clean {
 
 task Version {
     #This task determines what version number to assign this build
-    $GitVersionConfig = "$env:BHProjectPath/GitVersion.yml"
+    $GitVersionConfig = "$buildRoot/GitVersion.yml"
 
     #Fetch GitVersion
     #TODO: Use Nuget.exe to fetch to make this v3/v4 compatible
@@ -144,7 +144,7 @@ task Version {
     if (Test-Path $env:BHPSModuleManifest) {
         write-verbose "Fetching Version from Powershell Module Manifest (if present)"
         $ModuleManifestVersion = [Version](Get-Metadata $env:BHPSModuleManifest)
-        if (Test-Path $env:BHProjectPath/GitVersion.yml) {
+        if (Test-Path $buildRoot/GitVersion.yml) {
             $GitVersionConfigYAML = [ordered]@{}
             #ConvertFrom-YAML returns as individual key-value hashtables, we need to combine them into a single hashtable
             (Get-Content $GitVersionConfig | ConvertFrom-Yaml) | foreach-object {$GitVersionConfigYAML += $PSItem}
@@ -158,14 +158,14 @@ task Version {
 
     #Calcuate the GitVersion
     write-verbose "Executing GitVersion to determine version info"
-    $GitVersionOutput = & $GitVersionEXE $env:BHProjectPath
+    $GitVersionOutput = & $GitVersionEXE $buildRoot
 
     #Since GitVersion doesn't return error exit codes, we look for error text in the output in the output
-    if ($GitVersionOutput -match '^[ERROR|INFO] \[') {throw "An error occured when running GitVersion.exe $env:BHProjectPath"}
+    if ($GitVersionOutput -match '^[ERROR|INFO] \[') {throw "An error occured when running GitVersion.exe $buildRoot"}
     try {
         $GitVersionInfo = $GitVersionOutput | ConvertFrom-JSON -ErrorAction stop
     } catch {
-        throw "There was an error when running GitVersion.exe $env:BHProjectPath. The output of the command (if any) follows:"
+        throw "There was an error when running GitVersion.exe $buildRoot. The output of the command (if any) follows:"
         $GitVersionOutput
     }
 
@@ -188,8 +188,8 @@ task Version {
 
 #Copy all powershell module "artifacts" to Build Directory
 task CopyFilesToBuildDir {
-    #Make sure we are in the project location in case somethign changed
-    Set-Location $ENV:BHProjectPath
+    #Make sure we are in the project location in case somethign changedf
+    Set-Location $buildRoot
 
     #The file or file paths to copy, excluding the powershell psm1 and psd1 module and manifest files which will be autodetected
     #TODO: Move this somewhere higher in the hierarchy into a settings file, or rather go the "exclude" route
