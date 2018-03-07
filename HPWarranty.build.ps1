@@ -9,7 +9,7 @@
 $BuildHelperModules = "BuildHelpers", "PSDepend", "Pester", "powershell-yaml", "Microsoft.Powershell.Archive"
 
 #The file or file paths to copy, excluding the powershell psm1 and psd1 module and manifest files which will be autodetected
-$FilesToCopy = "Public","Private","Types","RequestTemplates","SubModules","LICENSE.md","README.md"
+$SCRIPT:FilesToCopy = "Public","Private","Types","RequestTemplates","SubModules","LICENSE.md","README.md"
 
 #Initialize Build Environment
 Enter-Build {
