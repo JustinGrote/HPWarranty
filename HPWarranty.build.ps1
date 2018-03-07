@@ -24,6 +24,12 @@ Enter-Build {
         write-build Green 'Detected a Noninteractive or CI environment, disabling prompt confirmations'
         $SCRIPT:CI = $true
         $ConfirmPreference = 'None'
+        $ProgressPreference = "SilentlyContinue"
+    }
+
+    #Fix a bug with the Appveyor 2017 image having a broken nuget (points to v3 URL but installed packagemanagement doesn't support v2)
+    if ($ENV:APPVEYOR -and $ENV:APPVEYOR_BUILD_WORKER_IMAGE -eq 'Visual Studio 2017') {
+        $PSDefaultParameterValues.add("*-Package:Source",'http://www.nuget.org/api/v2')
     }
 
     #Fetch Build Helper Modules using Install-ModuleBootstrap script (works in PSv3/4)
