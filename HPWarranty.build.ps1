@@ -46,7 +46,7 @@ Enter-Build {
                 if ($SCRIPT:CI) {
                     $installModuleParams.Force = $true
                 }
-                install-module @installModuleParams
+                install-module -Name $BuildHelperModuleItem @installModuleParams
             }
         }
     }
