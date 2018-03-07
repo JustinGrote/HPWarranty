@@ -41,7 +41,7 @@ Enter-Build {
                 $installModuleParams = @{
                     Scope = "CurrentUser"
                     Name = $BuildHelperItem
-                    ErrorAction = Stop
+                    ErrorAction = "Stop"
                 }
                 if ($SCRIPT:CI) {
                     $installModuleParams.Force = $true
