@@ -135,7 +135,7 @@ task Version {
         Get-PackageSource | ft | out-string | write-verbose
 
         #Fetch GitVersion
-        Install-Package $GitVersionCMDPackageName -scope currentuser -source 'nuget.org' -force @PassThruParams
+        $GitVersionPackage = Install-Package $GitVersionCMDPackageName -scope currentuser -source 'nuget.org' -force @PassThruParams
     }
     $GitVersionEXE = ((get-package $GitVersionCMDPackageName).source | split-path -Parent) + "\tools\GitVersion.exe"
 
@@ -193,8 +193,7 @@ task CopyFilesToBuildDir {
 
     #The file or file paths to copy, excluding the powershell psm1 and psd1 module and manifest files which will be autodetected
     #TODO: Move this somewhere higher in the hierarchy into a settings file, or rather go the "exclude" route
-    $SCRIPT:FilesToCopy = "Public","Private","Types","RequestTemplates","SubModules","LICENSE.md","README.md"
-    $FilesToCopy += "$($Env:BHProjectName).psm1","$($Env:BHProjectName).psd1"
+    $FilesToCopy = "Public","Private","Types","RequestTemplates","SubModules","LICENSE.md","README.md","$($Env:BHProjectName).psm1","$($Env:BHProjectName).psd1"
     copy-item -Recurse -Path $FilesToCopy -Destination $ProjectBuildPath @PassThruParams
 }
 
