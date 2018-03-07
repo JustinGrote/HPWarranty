@@ -316,21 +316,15 @@ task Pester {
     "`n"
 }
 
-task PackageArtifacts Version,{
-    $ZipArchivePath = (join-path $env:BHBuildOutput "$env:BHProjectName-$ProjectVersion.zip")
+task Package Version,{
+    $SCRIPT:ZipArchivePath = (join-path $env:BHBuildOutput "$env:BHProjectName-$ProjectVersion.zip")
     write-build green "Writing Finished Module to $ZipArchivePath"
     #Package the Powershell Module
     Compress-Archive -Path $ProjectBuildPath -DestinationPath $ZipArchivePath -Force @PassThruParams
-
-    #If we are in Appveyor, push completed zip to Appveyor Artifact
-    if ($env:APPVEYOR) {
-        write-host -ForegroundColor Green "Detected Appveyor, pushing Powershell Module archive to Artifacts"
-        Push-AppveyorArtifact $ZipArchivePath
-    }
 }
 
 #Deploy Supertask
-task Deploy PackageArtifacts
+task Deploy Package
 
 #Build SuperTask
 task Build Clean,CopyFilesToBuildDir,UpdateMetadata
