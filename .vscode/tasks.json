@@ -13,6 +13,7 @@
 
     // Start PowerShell
     "windows": {
+<<<<<<< HEAD
         "command": "powershell.exe",
         "args": [
             "-NoProfile",
@@ -34,12 +35,40 @@
             "-NoProfile",
             "-NonInteractive",
             "-ExecutionPolicy", "Bypass"
+=======
+        "command": "${env:windir}/System32/WindowsPowerShell/v1.0/powershell.exe",
+        //"command": "${env:ProgramFiles}/PowerShell/6.0.0/powershell.exe",
+        "args": [
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy", "Bypass", 
+            "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+        ],
+    },
+    "linux": {
+        "command": "/usr/bin/pwsh",
+        "args": [
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy", "Bypass", 
+            "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+        ],
+    },
+    "osx": {
+        "command": "/usr/local/bin/pwsh",
+        "args": [
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy", "Bypass", 
+            "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+>>>>>>> PesterTests
         ],
     },
 
     // Associate with test task runner
     "tasks": [
         {
+<<<<<<< HEAD
             "label": "Test",
 
             "group": {
@@ -62,12 +91,23 @@
                 "Bypass",
                 "-Command",
                 "Invoke-Build -Verbose Test"
+=======
+            "command": "powershell.exe",
+            "label": "Test",
+            "group": "test",
+            "args": [
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy", "Bypass", 
+                "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+>>>>>>> PesterTests
             ],
             "problemMatcher": "$pester"
         },
         {
             "label": "Test-PSCore",
             "group": "test",
+<<<<<<< HEAD
             "command": "pwsh",
             "args": [
                 "-NoProfile",
@@ -119,4 +159,16 @@
             "problemMatcher": "$pester"
         }
     ]
+=======
+            "command": "${env:ProgramFiles}/PowerShell/6.0.1/pwsh.exe",
+            "args": [
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy", "Bypass",
+                "-Command", "& {Invoke-Pester -Script Tests -PesterOption @{IncludeVSCodeMarker=$true}}"
+            ],
+            //"problemMatcher": "$pester"
+        },
+	]
+>>>>>>> PesterTests
 }
