@@ -12,7 +12,7 @@
 RootModule = 'HPWarranty.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.0.0'
+ModuleVersion = '3.0.0'
 
 # ID used to uniquely identify this module
 GUID = '4fb06411-cfeb-47fd-bf25-c0fbbdc6a09b'
