@@ -1,14 +1,16 @@
 #requires -module BuildHelpers
-if (-not (import-module BuildHelpers -PassThru -erroraction silentlycontinue)) {
+if (-not (import-module BuildHelpers -PassThru -verbose:$false -erroraction silentlycontinue)) {
     install-module buildhelpers -scope currentuser -erroraction stop -force
-    import-module BuildHelpers -erroraction stop
+    import-module BuildHelpers -erroraction stop -verbose:$false
 }
-
-$PSVersion = $PSVersionTable.PSVersion.Major
+#TODO: Replace this with Get-BuildEnvironment variables, leave the environment alone!
+Set-BuildEnvironment -force -BuildOutput "Release"
+#$PSVersion = $PSVersionTable.PSVersion.Major
 $BuildOutputProject = Join-Path $env:BHBuildOutput $env:BHProjectName
+$ModuleManifestPath = Join-Path $BuildOutputProject '\*.psd1'
 
+if (-not (Test-Path $ModuleManifestPath)) {throw "Module Manifest not found at $ModuleManifestPath. Did you run 'Invoke-Build Build' first?"}
 Describe 'Powershell Module' {
-    $ModuleManifestPath = Join-Path $BuildOutputProject '\*.psd1'
     Context "$env:BHProjectName" {
         $ModuleName = $env:BHProjectName
         It 'Has a valid Module Manifest' {
@@ -20,7 +22,7 @@ Describe 'Powershell Module' {
                 $TempModuleManifestPath = [System.IO.Path]::GetTempFileName() + '.psd1'
                 copy-item $ModuleManifestPath $TempModuleManifestPath
                 $Script:Manifest = Test-ModuleManifest $TempModuleManifestPath
-                remove-item $TempModuleManifestPath
+                remove-item $TempModuleManifestPath -verbose:$false
             }
         }
 
@@ -41,12 +43,14 @@ Describe 'Powershell Module' {
         }
 
         It 'Exports all public functions' {
-            $FunctionFiles = Get-ChildItem "$BuildOutputProject\Public" -Filter *.ps1 | Select -ExpandProperty BaseName
-            $FunctionNames = $FunctionFiles | foreach {$_ -replace '-', "-$($Manifest.Prefix)"}
+            $FunctionFiles = Get-ChildItem "$BuildOutputProject\Public" -Filter *.ps1
+            $FunctionNames = $FunctionFiles.basename | ForEach-Object {$_ -replace '-', "-$($Manifest.Prefix)"}
             $ExFunctions = $Manifest.ExportedFunctions.Values.Name
-            foreach ($FunctionName in $FunctionNames)
-            {
-                $ExFunctions -contains $FunctionName | Should Be $true
+            if ($functionNames) {
+                foreach ($FunctionName in $FunctionNames)
+                {
+                    $ExFunctions -contains $FunctionName | Should Be $true
+                }
             }
         }
 
@@ -55,7 +59,7 @@ Describe 'Powershell Module' {
         }
         It 'Can be imported as a module successfully' {
             Remove-Module $ModuleName -ErrorAction SilentlyContinue
-            Import-Module $BuildOutputProject -PassThru -OutVariable BuildOutputModule | Should BeOfType System.Management.Automation.PSModuleInfo
+            Import-Module $BuildOutputProject -PassThru -verbose:$false -OutVariable BuildOutputModule | Should BeOfType System.Management.Automation.PSModuleInfo
             $BuildOutputModule.Name | Should Be $ModuleName
         }
         It 'Is visible in Get-Module' {
@@ -67,8 +71,9 @@ Describe 'Powershell Module' {
 }
 
 Describe 'PSScriptAnalyzer' {
-    $results = Invoke-ScriptAnalyzer -Path $BuildOutputProject -Recurse -ExcludeRule "PSAvoidUsingCmdletAliases" -Verbose:$false
+    $results = Invoke-ScriptAnalyzer -Path $BuildOutputProject -Recurse -Setting PSGallery -Verbose:$false
     It 'PSScriptAnalyzer returns zero errors for all files in the repository' {
+        write-verbose ($results | Format-Table -autosize | out-string)
         $results.Count | Should Be 0
     }
 }
