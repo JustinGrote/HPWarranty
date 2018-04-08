@@ -1,4 +1,9 @@
 #requires -module BuildHelpers
+if (-not (import-module BuildHelpers -PassThru -erroraction silentlycontinue)) {
+    install-module buildhelpers -scope currentuser -erroraction stop -force
+    import-module BuildHelpers -erroraction stop
+}
+
 $PSVersion = $PSVersionTable.PSVersion.Major
 $BuildOutputProject = Join-Path $env:BHBuildOutput $env:BHProjectName
 
