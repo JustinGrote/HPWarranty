@@ -130,7 +130,7 @@ Function Get-HPEntWarrantyEntitlement {
         [Parameter()]
         [ValidateSet("HPSC","ISEE")]
         [String[]]
-        $QueryMethod = "HPSC",
+        $QueryMethod = ("HPSC","ISEE"),
 
         #Returns the data in the legacy hashtable format rather than the new object format
         [Switch]$AsHashTable
@@ -172,7 +172,6 @@ Function Get-HPEntWarrantyEntitlement {
                             write-verbose "Looking up device with Serial Number $SerialNumberItem$(if ($ProductNumber) {`" and Product ID $ProductNumber`"}) via HPSC method"
                             $output = Invoke-HPSCWarrantyRequest -SerialNumber $SerialNumberItem -CountryCode $CountryCode -ProductNumber $ProductNumber
                         }
-                        <#
                         "ISEE" {
                             #Prep the ISEE Request
                             $request = Register-HPEntISEEService $SerialNumberItem
@@ -190,7 +189,7 @@ Function Get-HPEntWarrantyEntitlement {
                                         '<[!--ProductNumber--!]>', $ProductNumber
                                     ).Replace(
                                         '<[!--SerialNumber--!]>', $SerialNumberItem
-                                    ) -Url 'https://services.isee.hp.com/EntitlementCheck/EntitlementCheckService.asmx' -Action 'http://www.hp.com/isee/webservices/GetOOSEntitlementList2'
+                                    ) -Url 'https://api.support.hpe.com/v1/EntitlementCheck/EntitlementCheckService.asmx' -Action 'http://www.hp.com/isee/webservices/GetOOSEntitlementList2'
                                 ).Envelope.Body.GetOOSEntitlementList2Response.GetOOSEntitlementList2Result.Response
                             } catch {
                                 Write-Error -Message 'Failed to invoke SOAP request.'
@@ -240,18 +239,17 @@ Function Get-HPEntWarrantyEntitlement {
                                     'OverallCoverageEndDate' = $null #TODO Add coverage end date
                                     'OverallCoverageStartDate' = $null #TODO Add coverage start date
                                     'ActiveWarranty' = if ($activeWarranty) {$true} else {$false}
-                                    'OverallWarrantyEndDate' = [DateTime]$entitlementInfo.OverallWarrantyEndDate
-                                    'OverallWarrantyStartDate' = [DateTime]$entitlementInfo.OverallWarrantyStartDate
+                                    'OverallWarrantyEndDate' = if ($entitlementInfo.OverallWarrantyEndDate) {[DateTime]$entitlementInfo.OverallWarrantyEndDate} else {$null}
+                                    'OverallWarrantyStartDate' = if ($entitlementInfo.OverallWarrantyStartDate) {[DateTime]$entitlementInfo.OverallWarrantyStartDate} else {$null}
                                     'ActiveContract' = if ($activeContract) {$true} else {$false}
-                                    'OverallContractEndDate' = [DateTime]$entitlementInfo.OverallContractEndDate
-                                    'OverallContractStartDate' = [DateTime]$entitlementInfo.OverallContractStartDate
+                                    'OverallContractEndDate' = if ($entitlementInfo.OverallContractEndDate) {[DateTime]$entitlementInfo.OverallContractEndDate} else {$null}
+                                    'OverallContractStartDate' = if ($entitlementInfo.OverallContractStartDate) {[DateTime]$entitlementInfo.OverallContractStartDate} else {$null}
                                     'WarrantyDetail' = $entitlementInfo.warranty
                                     'ContractDetail' = $entitlementInfo.contract
                                     'OriginalOrderDetail' = $entitlementInfo.oos
                                 }
                             }
                         }
-                        #>
                     }
 
                     #If the query method succeded, don't try the next method and move on

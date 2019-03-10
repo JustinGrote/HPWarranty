@@ -32,12 +32,12 @@
     http://dotps1.github.io/HPWarranty
 #>
 Function Invoke-HPEntSOAPRequest  {
-    
+
     [CmdletBinding()]
     [OutputType(
         [Xml]
     )]
-    
+
     Param (
         [Parameter(
             Mandatory = $true
@@ -49,8 +49,8 @@ Function Invoke-HPEntSOAPRequest  {
             Mandatory = $true
         )]
         [ValidateSet(
-            'https://services.isee.hp.com/ClientRegistration/ClientRegistrationService.asmx',
-            'https://services.isee.hp.com/EntitlementCheck/EntitlementCheckService.asmx'
+            'https://api.support.hpe.com/v1/ClientRegistration/ClientRegistrationService.asmx',
+            'https://api.support.hpe.com/v1/EntitlementCheck/EntitlementCheckService.asmx'
         )]
         [String]
         $Url,
@@ -66,24 +66,24 @@ Function Invoke-HPEntSOAPRequest  {
         $Action
     )
 
-    $soapWebRequest = [System.Net.WebRequest]::Create($URL) 
+    $soapWebRequest = [System.Net.WebRequest]::Create($URL)
     $soapWebRequest.Headers.Add('SOAPAction', $Action)
     $soapWebRequest.ContentType = 'text/xml; charset=utf-8'
     $soapWebRequest.Accept = 'text/xml'
-    $soapWebRequest.Method = 'POST' 
+    $soapWebRequest.Method = 'POST'
 
     try {
         $SOAPRequest.Save(
             ($requestStream = $soapWebRequest.GetRequestStream())
-        ) 
-    
-        $requestStream.Close() 
+        )
+
+        $requestStream.Close()
 
 	    $responseStream = ($soapWebRequest.GetResponse()).GetResponseStream()
-        
+
         [Xml]([System.IO.StreamReader]($responseStream)).ReadToEnd()
 
-	    $responseStream.Close() 
+	    $responseStream.Close()
     } catch {
         throw $_
     }

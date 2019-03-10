@@ -10,11 +10,11 @@ function Register-HPEntISEEService {
         )
         write-verbose "Registering Connection Session with HP Instant Support. This can take up to 90 seconds for some reason lately..."
         try {
-            [Xml]$registration = Invoke-HPEntSOAPRequest -SOAPRequest $registrationRequest -URL 'https://services.isee.hp.com/ClientRegistration/ClientRegistrationService.asmx' -Action 'http://www.hp.com/isee/webservices/RegisterClient2' -erroraction stop
+            [Xml]$registration = Invoke-HPEntSOAPRequest -SOAPRequest $registrationRequest -URL 'https://api.support.hpe.com/v1/ClientRegistration/ClientRegistrationService.asmx' -Action 'http://www.hp.com/isee/webservices/RegisterClient2' -erroraction stop
         } catch {
             write-error $PSItem
         }
-        
+
         if ($registration) {
             $Script:HPEntRegistration = @{
                 Gdid = $registration.Envelope.Body.RegisterClient2Response.RegisterClient2Result.Gdid
@@ -30,10 +30,10 @@ function Register-HPEntISEEService {
                 '<[!--CountryCode--!]>', $CountryCode
             )
         }
-        
+
     }
     #Return a copy of the template so it doesn't get directly modified
     if ($Script:HPEntRequestTemplate) {
         $Script:HPEntRequestTemplate.PSObject.Copy()
-    }   
+    }
 }
