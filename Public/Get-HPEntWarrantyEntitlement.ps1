@@ -251,8 +251,8 @@ Function Get-HPEntWarrantyEntitlement {
                                 }
                             }
                         }
+                        #>
                     }
-                    #>
 
                     #If the query method succeded, don't try the next method and move on
                     if ($output) {break}
