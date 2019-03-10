@@ -11,74 +11,8 @@
     // for the documentation about the tasks.json format
 	"version": "2.0.0",
 
-    // Start PowerShell
-    "windows": {
-        "command": "powershell.exe",
-        "args": [
-            "-NoProfile",
-            "-NonInteractive",
-            "-ExecutionPolicy", "Bypass"
-        ],
-    },
-    "linux": {
-        "command": "pwsh",
-        "args": [
-            "-NoProfile",
-            "-NonInteractive",
-            "-ExecutionPolicy", "Bypass"
-        ],
-    },
-    "osx": {
-        "command": "pwsh",
-        "args": [
-            "-NoProfile",
-            "-NonInteractive",
-            "-ExecutionPolicy", "Bypass"
-        ],
-    },
-
-    // Associate with test task runner
+    // Powershell Default Tasks
     "tasks": [
-        {
-            "label": "Test",
-
-            "group": {
-                "kind": "test",
-                "isDefault": true
-            },
-            "windows": {
-                "command": "powershell.exe"
-            },
-            "osx": {
-                "command": "pwsh"
-            },
-            "linux": {
-                "command": "pwsh"
-            },
-            "args": [
-                "-NoProfile",
-                "-NonInteractive",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                "Invoke-Build -Verbose Test"
-            ],
-            "problemMatcher": "$pester"
-        },
-        {
-            "label": "Test-PSCore",
-            "group": "test",
-            "command": "pwsh",
-            "args": [
-                "-NoProfile",
-                "-NonInteractive",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-Command",
-                "Invoke-Build -Verbose Test"
-            ],
-            "problemMatcher": "$pester"
-        },
         {
             "label": "Build",
             "group": {
@@ -100,23 +34,74 @@
                 "-ExecutionPolicy",
                 "Bypass",
                 "-Command",
-                "Invoke-Build Build"
+                "Invoke-Build"
             ],
-            "problemMatcher": "$pester"
+            "problemMatcher": [
+                "$pester"
+            ]
         },
         {
-            "label": "Build-on-PSCore",
+            "label": "Build with PSCore Preview",
             "group": "build",
-            "command": "pwsh",
+            "type": "process",
+            "command": "C:\\Program Files\\PowerShell\\6-preview\\pwsh.exe",
             "args": [
                 "-NoProfile",
                 "-NonInteractive",
                 "-ExecutionPolicy",
                 "Bypass",
                 "-Command",
-                "Invoke-Build Build"
+                "Invoke-Build"
+            ],
+            "problemMatcher": [
+                "$pester"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            }
+        },
+        {
+            "label": "Test",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "windows": {
+                "command": "powershell.exe"
+            },
+            "osx": {
+                "command": "pwsh"
+            },
+            "linux": {
+                "command": "pwsh"
+            },
+            "args": [
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "Invoke-Build Test"
             ],
             "problemMatcher": "$pester"
+        },
+        {
+            "label": "Test with PSCore Preview",
+            "group": "test",
+            "type": "process",
+            "command": "C:\\Program Files\\PowerShell\\6-preview\\pwsh.exe",
+            "args": [
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "Invoke-Build Test"
+            ],
+            "problemMatcher": "$pester",
+            "options": {
+                "cwd": "${workspaceRoot}"
+            }
         }
     ]
 }
