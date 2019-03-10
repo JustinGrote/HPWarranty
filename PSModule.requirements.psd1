@@ -19,4 +19,5 @@
     'Microsoft.Powershell.Archive'  = '1.2.2.0'
     PSScriptAnalyzer                = '1.17.1'
     Plaster                         = '1.1.3'
+    PowerHTML                       = '0.1.6'
 }
